@@ -11,9 +11,11 @@ import { saveAs } from "file-saver";
 
 type Child = Database["public"]["Tables"]["children"]["Row"];
 type Ticket = Database["public"]["Tables"]["tickets"]["Row"];
+type Registrar = Database["public"]["Tables"]["registrars"]["Row"];
 
 interface ChildWithTicket extends Child {
   ticket?: Ticket;
+  registrar?: Registrar;
 }
 
 const HOUSE_IMAGES: Record<string, string> = {
@@ -192,9 +194,19 @@ export function TicketsGallery() {
 
       if (ticketsError) throw ticketsError;
 
+      const { data: registrars } = await supabase
+        .from("registrars")
+        .select("*");
+
+      const registrarsMap = (registrars || []).reduce((acc, r) => {
+        acc[r.id] = r;
+        return acc;
+      }, {} as Record<string, Registrar>);
+
       const combined = (children || []).map((child) => ({
         ...child,
         ticket: (tickets || []).find((t) => t.child_id === child.id),
+        registrar: child.registered_by ? registrarsMap[child.registered_by] : undefined,
       }));
 
       setChildrenWithTickets(combined);
@@ -362,6 +374,7 @@ export function TicketsGallery() {
                 <TicketCard
                   child={child}
                   ticketNumber={child.ticket.ticket_number}
+                  registrarName={child.registrar?.name}
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 rounded-xl transition-colors flex items-center justify-center">
                   <Button

@@ -11,6 +11,7 @@ export type Database = {
           photo_url: string | null
           house: "Love" | "Joy" | "Hope" | "Peace" | null
           ticket_id: string | null
+          registered_by: string | null
           created_at: string
           updated_at: string
         }
@@ -23,6 +24,7 @@ export type Database = {
           photo_url?: string | null
           house?: "Love" | "Joy" | "Hope" | "Peace" | null
           ticket_id?: string | null
+          registered_by?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -35,6 +37,33 @@ export type Database = {
           photo_url?: string | null
           house?: "Love" | "Joy" | "Hope" | "Peace" | null
           ticket_id?: string | null
+          registered_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      registrars: {
+        Row: {
+          id: string
+          name: string
+          email: string
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          name: string
+          email: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          email?: string
+          is_active?: boolean
           created_at?: string
           updated_at?: string
         }

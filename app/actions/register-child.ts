@@ -30,6 +30,13 @@ export async function registerChild(childData: {
       },
     )
 
+    // Get current authenticated user (registrar)
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      throw new Error("You must be logged in to register children")
+    }
+
     const { data: insertedChild, error: childError } = await supabase
       .from("children")
       .insert({
@@ -39,6 +46,7 @@ export async function registerChild(childData: {
         gender: childData.gender,
         photo_url: childData.photoUrl,
         ticket_id: childData.ticketId,
+        registered_by: user.id,
       })
       .select()
       .single()

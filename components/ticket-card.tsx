@@ -7,6 +7,7 @@ type Child = Database["public"]["Tables"]["children"]["Row"];
 interface TicketCardProps {
   child: Child;
   ticketNumber: string;
+  registrarName?: string;
 }
 
 const HOUSE_IMAGES: Record<string, string> = {
@@ -16,7 +17,7 @@ const HOUSE_IMAGES: Record<string, string> = {
   Peace: "/tickets/House of Peace.jpg",
 };
 
-export function TicketCard({ child, ticketNumber }: TicketCardProps) {
+export function TicketCard({ child, ticketNumber, registrarName }: TicketCardProps) {
   const ticketImage = HOUSE_IMAGES[child.house || "Love"];
 
   return (
@@ -138,6 +139,11 @@ export function TicketCard({ child, ticketNumber }: TicketCardProps) {
           <span>Age: {child.age}</span>
           <span>Class: {child.class}</span>
           <span>{child.gender}</span>
+          {registrarName && (
+            <span className="text-xs">
+              Registered by: <span className="font-medium text-foreground">{registrarName}</span>
+            </span>
+          )}
         </div>
         <span className="font-mono font-medium text-foreground">
           #{ticketNumber}

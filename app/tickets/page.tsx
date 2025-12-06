@@ -1,4 +1,5 @@
-import { TicketsGallery } from "@/components/tickets-gallery"
+import { TicketsGalleryClient } from "@/components/tickets-gallery-client"
+import { getTicketsPage, type SortField, type SortDir } from "@/lib/tickets/queries"
 import { ChevronRight } from "lucide-react"
 import Link from "next/link"
 
@@ -7,7 +8,35 @@ export const metadata = {
   description: "View and download generated tickets for all registered children",
 }
 
-export default function TicketsPage() {
+interface PageProps {
+  searchParams: Promise<{
+    page?: string
+    q?: string
+    sort?: string
+    dir?: string
+    house?: string
+  }>
+}
+
+export default async function TicketsPage({ searchParams }: PageProps) {
+  const params = await searchParams
+  
+  const page = Math.max(1, Number(params.page) || 1)
+  const pageSize = 20
+  const sortField = (params.sort as SortField) || "created_at"
+  const sortDir = (params.dir as SortDir) || "desc"
+  const search = params.q || ""
+  const house = params.house || ""
+
+  const { rows, total } = await getTicketsPage({
+    page,
+    pageSize,
+    search,
+    sortField,
+    sortDir,
+    house,
+  })
+
   return (
     <main className="min-h-screen">
       {/* Hero Section */}
@@ -16,7 +45,7 @@ export default function TicketsPage() {
           <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl text-foreground tracking-tight leading-[1.1]">
             Generated Tickets
           </h1>
-          
+
           <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
             View and download tickets for all registered children
           </p>
@@ -36,7 +65,16 @@ export default function TicketsPage() {
       {/* Content */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-20 sm:pb-32">
         <div className="border border-border rounded-2xl p-6 sm:p-8 bg-card">
-          <TicketsGallery />
+          <TicketsGalleryClient
+            children={rows}
+            total={total}
+            page={page}
+            pageSize={pageSize}
+            sortField={sortField}
+            sortDir={sortDir}
+            search={search}
+            house={house}
+          />
         </div>
       </section>
     </main>
