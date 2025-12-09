@@ -134,20 +134,29 @@ export function TicketCard({ child, ticketNumber, registrarName }: TicketCardPro
       </div>
 
       {/* Ticket details below */}
-      <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground px-2">
-        <div className="flex items-center gap-4">
-          <span>Age: {child.age}</span>
-          <span>Class: {child.class}</span>
-          <span>{child.gender}</span>
+      <div className="mt-3 space-y-1 text-sm text-muted-foreground px-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4 flex-wrap">
+            <span>Age: {child.age}</span>
+            <span>Class: {child.class}</span>
+            <span>{child.gender}</span>
+          </div>
+          <span className="font-mono font-medium text-foreground">
+            #{ticketNumber}
+          </span>
+        </div>
+        <div className="flex items-center gap-4 flex-wrap text-xs">
+          {child.guardian_phone && (
+            <span>
+              Guardian: <span className="font-medium text-foreground">{child.guardian_phone}</span>
+            </span>
+          )}
           {registrarName && (
-            <span className="text-xs">
+            <span>
               Registered by: <span className="font-medium text-foreground">{registrarName}</span>
             </span>
           )}
         </div>
-        <span className="font-mono font-medium text-foreground">
-          #{ticketNumber}
-        </span>
       </div>
     </div>
   );

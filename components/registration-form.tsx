@@ -34,6 +34,7 @@ export function RegistrationForm({
   const [age, setAge] = useState("");
   const [className, setClassName] = useState("");
   const [gender, setGender] = useState("");
+  const [guardianPhone, setGuardianPhone] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -78,7 +79,7 @@ export function RegistrationForm({
   };
 
   const handleReviewClick = () => {
-    if (!name || !age || !className || !gender) {
+    if (!name || !age || !className || !gender || !guardianPhone) {
       setError("Please fill in all required fields before reviewing");
       return;
     }
@@ -119,6 +120,7 @@ export function RegistrationForm({
         gender: gender as "Male" | "Female",
         photoUrl,
         ticketId,
+        guardianPhone: guardianPhone || null,
       });
 
       if (!result.success) {
@@ -133,6 +135,7 @@ export function RegistrationForm({
       setAge("");
       setClassName("");
       setGender("");
+      setGuardianPhone("");
       setPhotoFile(null);
       setPhotoPreview("");
       setShowReview(false);
@@ -205,6 +208,14 @@ export function RegistrationForm({
                   {gender}
                 </p>
               </div>
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">
+                Guardian's Phone
+              </Label>
+              <p className="text-base font-medium text-foreground mt-1">
+                {guardianPhone}
+              </p>
             </div>
           </div>
 
@@ -334,6 +345,21 @@ export function RegistrationForm({
           </div>
         </div>
 
+        <div className="space-y-2">
+          <Label htmlFor="guardianPhone" className="text-sm font-medium">
+            Guardian's Phone Number
+          </Label>
+          <Input
+            id="guardianPhone"
+            type="tel"
+            placeholder="e.g. 08012345678"
+            value={guardianPhone}
+            onChange={(e) => setGuardianPhone(e.target.value)}
+            required
+            className="rounded-lg border-border bg-background"
+          />
+        </div>
+
         <div className="space-y-3">
           <Label htmlFor="photo" className="text-sm font-medium">
             Photo (Optional)
@@ -380,7 +406,7 @@ export function RegistrationForm({
         <Button
           type="button"
           onClick={handleReviewClick}
-          disabled={!name || !age || !className || !gender}
+          disabled={!name || !age || !className || !gender || !guardianPhone}
           className="w-full rounded-full bg-foreground text-background hover:opacity-80"
         >
           Review & Continue

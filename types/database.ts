@@ -12,6 +12,7 @@ export type Database = {
           house: "Love" | "Joy" | "Hope" | "Peace" | null
           ticket_id: string | null
           registered_by: string | null
+          guardian_phone: string | null
           created_at: string
           updated_at: string
         }
@@ -25,6 +26,7 @@ export type Database = {
           house?: "Love" | "Joy" | "Hope" | "Peace" | null
           ticket_id?: string | null
           registered_by?: string | null
+          guardian_phone?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -38,6 +40,7 @@ export type Database = {
           house?: "Love" | "Joy" | "Hope" | "Peace" | null
           ticket_id?: string | null
           registered_by?: string | null
+          guardian_phone?: string | null
           created_at?: string
           updated_at?: string
         }

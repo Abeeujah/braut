@@ -36,6 +36,7 @@ export async function fetchAllChildrenForBulkDownload(
       house,
       ticket_id,
       registered_by,
+      guardian_phone,
       created_at,
       updated_at,
       tickets (
@@ -81,6 +82,7 @@ export async function fetchAllChildrenForBulkDownload(
       house: c.house,
       ticket_id: c.ticket_id,
       registered_by: c.registered_by,
+      guardian_phone: c.guardian_phone,
       created_at: c.created_at,
       updated_at: c.updated_at,
       ticket: Array.isArray(c.tickets) ? c.tickets[0] ?? null : c.tickets ?? null,

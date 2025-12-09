@@ -3,16 +3,14 @@
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import type { Database } from "@/types/database"
-import { generateTicketNumber } from "@/lib/utils/ticket-generator"
 
-export async function registerChild(childData: {
+export async function updateChild(childId: string, childData: {
   name: string
   age: number
   class: string
   gender: "Male" | "Female"
-  photoUrl: string | null
-  ticketId: string
   guardianPhone: string | null
+  photoUrl?: string | null
 }) {
   try {
     const cookieStore = await cookies()
@@ -31,63 +29,43 @@ export async function registerChild(childData: {
       },
     )
 
-    // Get current authenticated user (registrar)
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {
-      throw new Error("You must be logged in to register children")
+      throw new Error("You must be logged in to update children")
     }
 
-    const { data: insertedChild, error: childError } = await supabase
+    const updateData: Record<string, any> = {
+      name: childData.name,
+      age: childData.age,
+      class: childData.class,
+      gender: childData.gender,
+      guardian_phone: childData.guardianPhone,
+      updated_at: new Date().toISOString(),
+    }
+
+    if (childData.photoUrl !== undefined) {
+      updateData.photo_url = childData.photoUrl
+    }
+
+    const { data: updatedChild, error } = await supabase
       .from("children")
-      .insert({
-        name: childData.name,
-        age: childData.age,
-        class: childData.class,
-        gender: childData.gender,
-        photo_url: childData.photoUrl,
-        ticket_id: childData.ticketId,
-        registered_by: user.id,
-        guardian_phone: childData.guardianPhone,
-      })
+      .update(updateData)
+      .eq("id", childId)
       .select()
       .single()
 
-    if (childError) {
-      console.error("[v0] Child insert error:", childError)
-      throw new Error(`Failed to register child: ${childError.message}`)
-    }
-
-    const assignedHouse = insertedChild.house!
-
-    const { count } = await supabase
-      .from("children")
-      .select("*", { count: "exact", head: true })
-      .eq("house", assignedHouse)
-
-    const ticketNumber = generateTicketNumber(assignedHouse, count || 1)
-
-    const { error: ticketError } = await supabase.from("tickets").insert({
-      id: childData.ticketId,
-      child_id: insertedChild.id,
-      ticket_number: ticketNumber,
-      status: "active",
-    })
-
-    if (ticketError) {
-      console.error("[v0] Ticket insert error:", ticketError)
-      throw new Error(`Failed to create ticket: ${ticketError.message}`)
+    if (error) {
+      console.error("[update-child] Error:", error)
+      throw new Error(`Failed to update child: ${error.message}`)
     }
 
     return {
       success: true,
-      childId: insertedChild.id,
-      ticketId: childData.ticketId,
-      ticketNumber,
-      house: assignedHouse,
+      child: updatedChild,
     }
   } catch (error) {
-    console.error("[v0] Registration error:", error)
+    console.error("[update-child] Error:", error)
     return {
       success: false,
       error: error instanceof Error ? error.message : "An unknown error occurred",
@@ -95,7 +73,7 @@ export async function registerChild(childData: {
   }
 }
 
-export async function uploadChildPhoto(photoFile: File, ticketId: string) {
+export async function uploadChildPhotoForUpdate(photoFile: File, childId: string) {
   try {
     const supabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -110,7 +88,7 @@ export async function uploadChildPhoto(photoFile: File, ticketId: string) {
       },
     )
 
-    const fileName = `${ticketId}.jpg`
+    const fileName = `${childId}-${Date.now()}.jpg`
     const buffer = await photoFile.arrayBuffer()
 
     const { error: uploadError } = await supabase.storage.from("child-photos").upload(fileName, buffer, {
@@ -121,7 +99,7 @@ export async function uploadChildPhoto(photoFile: File, ticketId: string) {
 
     if (uploadError) {
       if (uploadError.message.includes("Bucket not found")) {
-        console.warn("[v0] Storage bucket not found - returning base64 fallback")
+        console.warn("[update-child] Storage bucket not found")
         return null
       }
       throw uploadError
@@ -130,7 +108,7 @@ export async function uploadChildPhoto(photoFile: File, ticketId: string) {
     const photoUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/child-photos/${fileName}`
     return photoUrl
   } catch (error) {
-    console.error("[v0] Photo upload error:", error)
+    console.error("[update-child] Photo upload error:", error)
     return null
   }
 }

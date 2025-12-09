@@ -12,7 +12,7 @@ export function CameraCapture({ onCapture }: CameraCaptureProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isCameraReady, setIsCameraReady] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [facingMode, setFacingMode] = useState<"user" | "environment">("user")
+  const [facingMode, setFacingMode] = useState<"user" | "environment">("environment")
   const [hasMultipleCameras, setHasMultipleCameras] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)

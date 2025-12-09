@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { TicketCard } from "@/components/ticket-card"
+import { ChildDetailModal } from "@/components/child-detail-modal"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
@@ -13,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Download, RefreshCw, FolderDown, Search, ChevronLeft, ChevronRight, Archive } from "lucide-react"
+import { Download, RefreshCw, FolderDown, Search, ChevronLeft, ChevronRight, Archive, Eye } from "lucide-react"
 import type { ChildWithTicket, SortField, SortDir } from "@/lib/tickets/queries"
 import { generateTicketBlob } from "@/lib/tickets/generate-ticket-blob"
 import { fetchAllChildrenForBulkDownload } from "@/app/actions/bulk-tickets"
@@ -47,6 +48,7 @@ export function TicketsGalleryClient({
   const [bulkProgressPercent, setBulkProgressPercent] = useState(0)
   const [isDownloadingAll, setIsDownloadingAll] = useState(false)
   const [searchInput, setSearchInput] = useState(search)
+  const [selectedChild, setSelectedChild] = useState<ChildWithTicket | null>(null)
 
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -316,22 +318,27 @@ export function TicketsGalleryClient({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {childrenWithTickets.map((child) =>
             child.ticket ? (
-              <div
-                key={child.id}
-                className="group cursor-pointer"
-                onClick={() => downloadTicket(child)}
-              >
+              <div key={child.id} className="group">
                 <div className="relative transition-transform duration-200 hover:scale-[1.02]">
                   <TicketCard
                     child={child}
                     ticketNumber={child.ticket.ticket_number}
                     registrarName={child.registrar?.name}
                   />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 rounded-xl transition-colors flex items-center justify-center">
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 rounded-xl transition-colors flex items-center justify-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity rounded-full"
+                      onClick={() => setSelectedChild(child)}
+                    >
+                      <Eye className="w-4 h-4 mr-2" /> View
+                    </Button>
                     <Button
                       size="sm"
                       className="opacity-0 group-hover:opacity-100 transition-opacity rounded-full"
                       disabled={downloadingId === child.id}
+                      onClick={() => downloadTicket(child)}
                     >
                       {downloadingId === child.id ? (
                         "Downloading..."
@@ -376,6 +383,19 @@ export function TicketsGalleryClient({
             </Button>
           </div>
         </div>
+      )}
+
+      {/* Child Detail Modal */}
+      {selectedChild && (
+        <ChildDetailModal
+          child={selectedChild}
+          isOpen={!!selectedChild}
+          onClose={() => setSelectedChild(null)}
+          onUpdate={() => {
+            setSelectedChild(null)
+            updateQuery({ _ts: Date.now().toString() })
+          }}
+        />
       )}
     </div>
   )
